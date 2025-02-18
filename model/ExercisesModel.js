@@ -1,31 +1,34 @@
-const {Sequelize, DataTypes} = require('sequelize');
-const User = require("./UserModel")
-
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../database/db');
+const User = require('./UserModel');
+const Exercises = require('./ExercisesModel');
 
-const Exercises = sequelize.define('Exercises',{
-
-    id:{
-       type: DataTypes.INTEGER,
-       primaryKey: true, 
-       autoIncrement: true,
-    } ,
+const User_Exercises = sequelize.define('User_Exercises', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+    },
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
             model: User,
-            key: "id",
+            key: 'id',
         },
-        onDelete: "CASCADE",
+        onDelete: 'CASCADE',
     },
-     
-     Description:{
-        type:DataTypes.STRING,
+    exerciseId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-     },
-    
-    
+        references: {
+            model: Exercises,
+            key: 'id',
+        },
+        onDelete: 'CASCADE',
+    },
+}, {
+    timestamps: true,
 });
 
-module.exports = Exercises;
+module.exports = User_Exercises;

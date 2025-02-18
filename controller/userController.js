@@ -1,60 +1,237 @@
-const User = require('../model/Test')
-const jwt=require(JsonWebTokenError)
-const bycrypt=require('bcrypt')
-const registerUser=async()=>{
-const {username,password}=req.body;
-if(!username||password){
-    return res.status(400).json({
-        error:"Insert the username and password"
-    });
-}
-try{
-    const existingUser=await User.findOne({where:{username}})
-    if(existingUser){
-        return res.status(400).json({
-            error:"username already exists"
-        })
+const User = require('../model/UserModel')
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+// Register a new user
+const registerUser = async (req, res) => {
+    const { username, password } = req.body;
+
+    // Validate input
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
     }
-    const saltRounds=10;
-    const hashPassword=await bycrypt.hash(password,saltRounds)
-    const newUser=await User.create({username,password:hashPassword})
-    res.status(201).json({message:"registeration successful..........."})
-}
-catch(error){
-    res.status(500).json({error:"Something went wrong..........."})
-    console.log(error)
-}
-}
-const loginUser=async(req,res)=>{
-    const{username,password}=req.body;
-    if(!username||!password){
-        return res.status(400).json({
-            error:"Insert the username and password"
+
+    try {
+        // Check if the username already exists
+        const existingUser = await User.findOne({ where: { username } });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Username already exists' });
+        }
+
+        // Hash the password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Create the user
+        const newUser = await User.create({ username, password: hashedPassword });
+
+        res.status(201).json({ message: 'User registered successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to register user' });
+    }
+};
+
+
+// Login an existing user
+const loginUser = async (req, res) => {
+    const { username, password } = req.body;
+
+    // Validate input
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    try {
+        // Find the user by username
+        const user = await User.findOne({ where: { username } });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Verify the password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Generate a JWT token
+        const token = jwt.sign(
+            { id: user.id, username: user.username },
+            process.env.JWT_SECRET || 'JKHSDKJBKJSDJSDJKBKSD345345345345',
+            { expiresIn: '24h' }
+        );
+
+        res.status(200).json({
+            message: 'Login successful',
+            token,
+            user: { id: user.id, username: user.username }
         });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to login user' });
     }
+};
+
+
+
+
+const getUser = async(req, res)=>{
+
     try{
-        const user=await User.findOne({where:{username}})
-        if(!user){
-            return res.status(400).json({
-                error:"Username not found"
-            })
-        }
-        const isMatch=await bycrypt.compare(password,user.password)
-        if(!isMatch){
-            return res.status(400).json({
-                error:"Password didn't match"
-            })
-        }
-        const token=jwt.sign(
-            {id:user.id,username:user.username},
-            'Aagya Neupane',
-            {expiresIn:'24'}
- )
-    }
-    catch(error){
+        const tests = await User.findAll();
+        res.status(200).json(tests);
 
     }
+    catch(error){
+        res.status(500).json({error: "Failed to Load"})
+    }
 }
+
+const createUser = async(req, res)=>{
+    
+    try{
+        
+const {username, password} = req.body;
+
+//Hash the password
+const newtest = await User.create({username, password})
+
+res.status(200).json(newtest);
+    }
+    catch(error){
+        res.status(500).json({error: "Failed to Load"})
+        console.log(error)
+    }
+
+}
+
+const updateUser = async(req, res)=>{
+    try {
+        const user = await User.findByPk(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        await user.update(req.body);
+        res.json(user);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+}
+
+const deleteUser = async(req, res)=>{
+    try {
+        const user = await User.findByPk(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        await user.destroy();
+        res.json({ message: 'User deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = {createUser, getUser, deleteUser, updateUser,loginUser, registerUser}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const User = require('../model/Test')
+// const jwt=require(JsonWebTokenError)
+// const bycrypt=require('bcrypt')
+// const registerUser=async()=>{
+// const {username,password}=req.body;
+// if(!username||password){
+//     return res.status(400).json({
+//         error:"Insert the username and password"
+//     });
+// }
+// try{
+//     const existingUser=await User.findOne({where:{username}})
+//     if(existingUser){
+//         return res.status(400).json({
+//             error:"username already exists"
+//         })
+//     }
+//     const saltRounds=10;
+//     const hashPassword=await bycrypt.hash(password,saltRounds)
+//     const newUser=await User.create({username,password:hashPassword})
+//     res.status(201).json({message:"registeration successful..........."})
+// }
+// catch(error){
+//     res.status(500).json({error:"Something went wrong..........."})
+//     console.log(error)
+// }
+// }
+// const loginUser=async(req,res)=>{
+//     const{username,password}=req.body;
+//     if(!username||!password){
+//         return res.status(400).json({
+//             error:"Insert the username and password"
+//         });
+//     }
+//     try{
+//         const user=await User.findOne({where:{username}})
+//         if(!user){
+//             return res.status(400).json({
+//                 error:"Username not found"
+//             })
+//         }
+//         const isMatch=await bycrypt.compare(password,user.password)
+//         if(!isMatch){
+//             return res.status(400).json({
+//                 error:"Password didn't match"
+//             })
+//         }
+//         const token=jwt.sign(
+//             {id:user.id,username:user.username},
+//             'Aagya Neupane',
+//             {expiresIn:'24'}
+//  )
+//     }
+//     catch(error){
+
+//     }
+// }
 
 // const getUser = async(req, res)=>{
 
@@ -113,6 +290,6 @@ const loginUser=async(req,res)=>{
 // }
 
 
-module.exports = {createUser, getUser, deleteUser, updateUser}
-message.txt
+// module.exports = {createUser, getUser, deleteUser, updateUser}
+// message.txt
 
