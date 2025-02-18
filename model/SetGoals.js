@@ -4,7 +4,7 @@ const User = require("./UserModel")
 const sequelize = require('../database/db');
 const { defaultValueSchemable } = require('sequelize/lib/utils');
 
-const MoodTracker = sequelize.define('MoodTracker',{
+const SetGoals = sequelize.define('SetGoals',{
 
     id:{
        type: DataTypes.INTEGER,
@@ -33,4 +33,4 @@ const MoodTracker = sequelize.define('MoodTracker',{
     
 });
 
-module.exports = JounalEntry;
+module.exports = SetGoals;

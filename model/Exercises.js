@@ -3,7 +3,7 @@ const User = require("./UserModel")
 
 const sequelize = require('../database/db');
 
-const JounalEntry = sequelize.define('JournalEntry',{
+const Exercises = sequelize.define('Exercises',{
 
     id:{
        type: DataTypes.INTEGER,
@@ -28,4 +28,4 @@ const JounalEntry = sequelize.define('JournalEntry',{
     
 });
 
-module.exports = JounalEntry;
+module.exports = Exercises;

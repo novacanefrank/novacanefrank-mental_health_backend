@@ -28,4 +28,4 @@ const MoodTracker = sequelize.define('MoodTracker',{
     
 });
 
-module.exports = JounalEntry;
+module.exports = MoodTracker;
