@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const moodTrackerController = require('../controllers/moodTrackerController');
+const moodTrackerController = require('../controller/moodTrackerController');
 
 router.get('/', moodTrackerController.getAllMoodEntries);
 router.get('/:id', moodTrackerController.getMoodEntryById);
