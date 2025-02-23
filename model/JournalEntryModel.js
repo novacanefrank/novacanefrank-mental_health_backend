@@ -1,15 +1,14 @@
-const {Sequelize, DataTypes} = require('sequelize');
+const {DataTypes} = require('sequelize');
 const User = require("./UserModel")
-
 const sequelize = require('../database/db');
 
-const JounalEntry = sequelize.define('JournalEntry',{
+const JounalEntry = sequelize.define('JournalEntries',{
 
     id:{
        type: DataTypes.INTEGER,
        primaryKey: true, 
        autoIncrement: true,
-    } ,
+    },
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -18,6 +17,17 @@ const JounalEntry = sequelize.define('JournalEntry',{
             key: "id",
         },
         onDelete: "CASCADE",
+    },
+    title:{
+        type: DataTypes.STRING,
+        allowNull:false,
+
+    },
+
+    entry:{
+        type:DataTypes.STRING,
+        allowNull:false,
+
     },
      
      Date:{
@@ -28,4 +38,5 @@ const JounalEntry = sequelize.define('JournalEntry',{
     
 });
 
+JounalEntry.belongsTo(User, { foreignKey: "userId" });
 module.exports = JounalEntry;

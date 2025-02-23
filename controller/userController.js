@@ -2,74 +2,81 @@ const User = require('../model/UserModel')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-// Register a new user
 const registerUser = async (req, res) => {
-    const { username, password } = req.body;
+    const { username, email, password, isAdmin } = req.body;
+    console.log("📥 Incoming Registration Request:", { username, email, isAdmin });
 
-    // Validate input
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password are required' });
+    if (!username || !email || !password) {
+        return res.status(400).json({ error: "All fields are required" });
     }
 
     try {
-        // Check if the username already exists
-        const existingUser = await User.findOne({ where: { username } });
+        const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
-            return res.status(400).json({ error: 'Username already exists' });
+            return res.status(400).json({ error: "Email already registered" });
         }
 
-        // Hash the password
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const hashPassword = await bcrypt.hash(password, 10);
+        const newUser = await User.create({ 
+            username, 
+            email, 
+            password: hashPassword, 
+            isAdmin: isAdmin || false // Default to false if not specified
+        });
 
-        // Create the user
-        const newUser = await User.create({ username, password: hashedPassword });
+        //    Ensure isAdmin is included in JWT token
+        const token = jwt.sign({ 
+            id: newUser.id, 
+            username: newUser.username, 
+            isAdmin: newUser.isAdmin 
+        }, process.env.JWT_SECRET, { expiresIn: "720h" });
 
-        res.status(201).json({ message: 'User registered successfully' });
+        res.status(201).json({ 
+            message: "Registration Successful", 
+            token,
+            isAdmin: newUser.isAdmin,
+            username: newUser.username 
+        });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to register user' });
+        console.error("  Registration Error:", error);
+        res.status(500).json({ error: "Something went wrong." });
     }
 };
 
-
-// Login an existing user
 const loginUser = async (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    // Validate input
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password are required' });
+    if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
     }
 
     try {
-        // Find the user by username
-        const user = await User.findOne({ where: { username } });
+        const user = await User.findOne({ where: { email } });
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(400).json({ error: "User not found" });
         }
 
-        // Verify the password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(400).json({ error: "Incorrect password" });
         }
 
-        // Generate a JWT token
-        const token = jwt.sign(
-            { id: user.id, username: user.username },
-            process.env.JWT_SECRET || 'JKHSDKJBKJSDJSDJKBKSD345345345345',
-            { expiresIn: '24h' }
-        );
+        //    Ensure isAdmin is included in JWT token
+        const token = jwt.sign({
+            id: user.id,
+            username: user.username,
+            isAdmin: user.isAdmin 
+        }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
         res.status(200).json({
-            message: 'Login successful',
+            message: "Login Successful",
             token,
-            user: { id: user.id, username: user.username }
+            isAdmin: user.isAdmin, 
+            username: user.username 
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to login user' });
+        console.error("  Login Error:", error);
+        res.status(500).json({ error: "Something went wrong." });
     }
 };
 

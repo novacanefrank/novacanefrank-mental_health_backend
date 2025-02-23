@@ -1,8 +1,6 @@
-const {Sequelize, DataTypes} = require('sequelize');
+const {DataTypes} = require('sequelize');
 const User = require("./UserModel")
-
 const sequelize = require('../database/db');
-const { defaultValueSchemable } = require('sequelize/lib/utils');
 
 const SetGoals = sequelize.define('SetGoals',{
 
@@ -20,12 +18,17 @@ const SetGoals = sequelize.define('SetGoals',{
         },
         onDelete: "CASCADE",
     },
+
+    title:{
+         type:DataTypes.INTEGER,
+         allowNull:false
+    },
      
      Date:{
         type:DataTypes.STRING,
         allowNull: false,
      },
-     Status:{
+     isCompleted:{
         type:DataTypes.BOOLEAN,
         defaultValue: false,
      }

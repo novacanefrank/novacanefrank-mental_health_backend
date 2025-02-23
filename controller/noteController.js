@@ -1,14 +1,38 @@
 const Note = require('../model/NoteModel');
 const User = require('../model/UserModel');
 
+// Create a new note
+const createNote = async (req, res) => {
+    try {
+        const { userId, Message, Date } = req.body;
+
+        // Validate required fields
+        if (!userId || !Message || !Date) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // Check if user exists
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const newNote = await Note.create({ userId, Message, Date });
+        res.status(201).json(newNote);
+    } catch (error) {
+        console.error("Error creating note:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 // Get all notes
 const getAllNotes = async (req, res) => {
     try {
-        const notes = await Note.findAll();
+        const notes = await Note.findAll({ include: User });
         res.status(200).json(notes);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch notes' });
+        console.error("Error fetching notes:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -16,33 +40,16 @@ const getAllNotes = async (req, res) => {
 const getNoteById = async (req, res) => {
     try {
         const { id } = req.params;
-        const note = await Note.findByPk(id);
+        const note = await Note.findByPk(id, { include: User });
 
         if (!note) {
-            return res.status(404).json({ error: 'Note not found' });
+            return res.status(404).json({ message: "Note not found" });
         }
 
         res.status(200).json(note);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch note' });
-    }
-};
-
-// Create a new note
-const createNote = async (req, res) => {
-    try {
-        const { userId, Message, Date } = req.body;
-
-        if (!userId || !Message || !Date) {
-            return res.status(400).json({ error: 'User ID, Message, and Date are required' });
-        }
-
-        const newNote = await Note.create({ userId, Message, Date });
-        res.status(201).json(newNote);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to create note' });
+        console.error("Error fetching note:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -50,17 +57,21 @@ const createNote = async (req, res) => {
 const updateNote = async (req, res) => {
     try {
         const { id } = req.params;
-        const note = await Note.findByPk(id);
+        const { Message, Date } = req.body;
 
+        const note = await Note.findByPk(id);
         if (!note) {
-            return res.status(404).json({ error: 'Note not found' });
+            return res.status(404).json({ message: "Note not found" });
         }
 
-        await note.update(req.body);
+        note.Message = Message || note.Message;
+        note.Date = Date || note.Date;
+
+        await note.save();
         res.status(200).json(note);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to update note' });
+        console.error("Error updating note:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -68,24 +79,24 @@ const updateNote = async (req, res) => {
 const deleteNote = async (req, res) => {
     try {
         const { id } = req.params;
-        const note = await Note.findByPk(id);
 
+        const note = await Note.findByPk(id);
         if (!note) {
-            return res.status(404).json({ error: 'Note not found' });
+            return res.status(404).json({ message: "Note not found" });
         }
 
         await note.destroy();
-        res.status(200).json({ message: 'Note deleted successfully' });
+        res.status(200).json({ message: "Note deleted successfully" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to delete note' });
+        console.error("Error deleting note:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
 module.exports = {
+    createNote,
     getAllNotes,
     getNoteById,
-    createNote,
     updateNote,
-    deleteNote
+    deleteNote,
 };

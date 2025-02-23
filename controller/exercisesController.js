@@ -3,98 +3,99 @@ const User = require('../model/UserModel');
 
 // Create a new exercise
 const createExercise = async (req, res) => {
-    const { userId, description } = req.body;
-
-    if (!userId || !description) {
-        return res.status(400).json({ error: 'User ID and Description are required' });
-    }
-
     try {
+        const { title, userId } = req.body;
+
+        // Validate required fields
+        if (!title || !userId) {
+            return res.status(400).json({ message: "Title and userId are required" });
+        }
+
         // Check if user exists
         const user = await User.findByPk(userId);
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ message: "User not found" });
         }
 
-        const newExercise = await Exercises.create({ userId, Description: description });
-
+        const newExercise = await Exercises.create({ title, userId });
         res.status(201).json(newExercise);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to create exercise' });
+        console.error("Error creating exercise:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
 // Get all exercises
-const getExercises = async (req, res) => {
+const getAllExercises = async (req, res) => {
     try {
-        const exercises = await Exercises.findAll();
+        const exercises = await Exercises.findAll({ include: User });
         res.status(200).json(exercises);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch exercises' });
+        console.error("Error fetching exercises:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
-// Get a single exercise by ID
+// Get exercise by ID
 const getExerciseById = async (req, res) => {
     try {
         const { id } = req.params;
-        const exercise = await Exercises.findByPk(id);
+        const exercise = await Exercises.findByPk(id, { include: User });
 
         if (!exercise) {
-            return res.status(404).json({ error: 'Exercise not found' });
+            return res.status(404).json({ message: "Exercise not found" });
         }
 
         res.status(200).json(exercise);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch exercise' });
+        console.error("Error fetching exercise:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
-// Update an exercise
+// Update exercise
 const updateExercise = async (req, res) => {
     try {
         const { id } = req.params;
-        const { description } = req.body;
+        const { title } = req.body;
 
         const exercise = await Exercises.findByPk(id);
         if (!exercise) {
-            return res.status(404).json({ error: 'Exercise not found' });
+            return res.status(404).json({ message: "Exercise not found" });
         }
 
-        await exercise.update({ Description: description });
-        res.status(200).json({ message: 'Exercise updated successfully', exercise });
+        exercise.title = title || exercise.title;
+        await exercise.save();
+
+        res.status(200).json(exercise);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to update exercise' });
+        console.error("Error updating exercise:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
-// Delete an exercise
+// Delete exercise
 const deleteExercise = async (req, res) => {
     try {
         const { id } = req.params;
 
         const exercise = await Exercises.findByPk(id);
         if (!exercise) {
-            return res.status(404).json({ error: 'Exercise not found' });
+            return res.status(404).json({ message: "Exercise not found" });
         }
 
         await exercise.destroy();
-        res.status(200).json({ message: 'Exercise deleted successfully' });
+        res.status(200).json({ message: "Exercise deleted successfully" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to delete exercise' });
+        console.error("Error deleting exercise:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
-module.exports = { 
-    createExercise, 
-    getExercises, 
-    getExerciseById, 
-    updateExercise, 
-    deleteExercise 
+module.exports = {
+    createExercise,
+    getAllExercises,
+    getExerciseById,
+    updateExercise,
+    deleteExercise,
 };
-

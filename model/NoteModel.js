@@ -1,9 +1,8 @@
-const {Sequelize, DataTypes} = require('sequelize');
+const {DataTypes} = require('sequelize');
 const User = require("./UserModel")
-
 const sequelize = require('../database/db');
 
-const Note = sequelize.define('Note',{
+const Note = sequelize.define('Notes',{
 
     id:{
        type: DataTypes.INTEGER,
@@ -20,12 +19,17 @@ const Note = sequelize.define('Note',{
         onDelete: "CASCADE",
     },
      
-     Description:{
+     Message:{
         type:DataTypes.STRING,
         allowNull: false,
      },
+     Date:{
+        type:DataTypes.STRING,
+        allowNull: false,
+     },
+
     
     
 });
 
-module.exports = Exercises;
+module.exports = Note;

@@ -1,14 +1,38 @@
 const SetGoals = require('../model/SetGoalsModel');
 const User = require('../model/UserModel');
 
-// Get all goals
-const getGoals = async (req, res) => {
+// Create a new goal
+const createGoal = async (req, res) => {
     try {
-        const goals = await SetGoals.findAll();
+        const { userId, title, Date, isCompleted } = req.body;
+
+        // Validate required fields
+        if (!userId || !title || !Date) {
+            return res.status(400).json({ message: "UserId, title, and date are required" });
+        }
+
+        // Check if user exists
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const newGoal = await SetGoals.create({ userId, title, Date, isCompleted });
+        res.status(201).json(newGoal);
+    } catch (error) {
+        console.error("Error creating goal:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+// Get all goals
+const getAllGoals = async (req, res) => {
+    try {
+        const goals = await SetGoals.findAll({ include: User });
         res.status(200).json(goals);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch goals' });
+        console.error("Error fetching goals:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -16,33 +40,16 @@ const getGoals = async (req, res) => {
 const getGoalById = async (req, res) => {
     try {
         const { id } = req.params;
-        const goal = await SetGoals.findByPk(id);
+        const goal = await SetGoals.findByPk(id, { include: User });
 
         if (!goal) {
-            return res.status(404).json({ error: 'Goal not found' });
+            return res.status(404).json({ message: "Goal not found" });
         }
 
         res.status(200).json(goal);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch goal' });
-    }
-};
-
-// Create a new goal
-const createGoal = async (req, res) => {
-    try {
-        const { userId, Date, Status } = req.body;
-
-        if (!userId || !Date) {
-            return res.status(400).json({ error: 'User ID and Date are required' });
-        }
-
-        const newGoal = await SetGoals.create({ userId, Date, Status });
-        res.status(201).json(newGoal);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to create goal' });
+        console.error("Error fetching goal:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -50,17 +57,22 @@ const createGoal = async (req, res) => {
 const updateGoal = async (req, res) => {
     try {
         const { id } = req.params;
-        const goal = await SetGoals.findByPk(id);
+        const { title, Date, isCompleted } = req.body;
 
+        const goal = await SetGoals.findByPk(id);
         if (!goal) {
-            return res.status(404).json({ error: 'Goal not found' });
+            return res.status(404).json({ message: "Goal not found" });
         }
 
-        await goal.update(req.body);
+        goal.title = title || goal.title;
+        goal.Date = Date || goal.Date;
+        goal.isCompleted = isCompleted !== undefined ? isCompleted : goal.isCompleted;
+
+        await goal.save();
         res.status(200).json(goal);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to update goal' });
+        console.error("Error updating goal:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -68,24 +80,24 @@ const updateGoal = async (req, res) => {
 const deleteGoal = async (req, res) => {
     try {
         const { id } = req.params;
-        const goal = await SetGoals.findByPk(id);
 
+        const goal = await SetGoals.findByPk(id);
         if (!goal) {
-            return res.status(404).json({ error: 'Goal not found' });
+            return res.status(404).json({ message: "Goal not found" });
         }
 
         await goal.destroy();
-        res.status(200).json({ message: 'Goal deleted successfully' });
+        res.status(200).json({ message: "Goal deleted successfully" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to delete goal' });
+        console.error("Error deleting goal:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
 module.exports = {
-    getGoals,
-    getGoalById,
     createGoal,
+    getAllGoals,
+    getGoalById,
     updateGoal,
-    deleteGoal
+    deleteGoal,
 };

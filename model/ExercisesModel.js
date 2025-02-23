@@ -1,13 +1,17 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const {DataTypes } = require('sequelize');
 const sequelize = require('../database/db');
 const User = require('./UserModel');
-const Exercises = require('./ExercisesModel');
 
-const User_Exercises = sequelize.define('User_Exercises', {
+
+const Exercises = sequelize.define('exercises', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+    },
+    title :{
+        type:DataTypes.STRING,
+        allowNull:false
     },
     userId: {
         type: DataTypes.INTEGER,
@@ -18,17 +22,10 @@ const User_Exercises = sequelize.define('User_Exercises', {
         },
         onDelete: 'CASCADE',
     },
-    exerciseId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: Exercises,
-            key: 'id',
-        },
-        onDelete: 'CASCADE',
-    },
+  
 }, {
     timestamps: true,
 });
+Exercises.belongsTo(User, { foreignKey: "userId" });
 
-module.exports = User_Exercises;
+module.exports = Exercises;

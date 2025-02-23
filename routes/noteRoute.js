@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const noteController = require('../controller/noteController');
 
-router.get('/', noteController.getAllNotes);
-router.get('/:id', noteController.getNoteById);
-router.post('/', noteController.createNote);
-router.put('/:id', noteController.updateNote);
-router.delete('/:id', noteController.deleteNote);
+router.get('/getAllNotes', noteController.getAllNotes);
+router.get('/getNoteById:id', noteController.getNoteById);
+router.post('/createNote:id', noteController.createNote);
+router.put('/updateNote:id', noteController.updateNote);
+router.delete('/deleteNote:id', noteController.deleteNote);
 
 module.exports = router;
