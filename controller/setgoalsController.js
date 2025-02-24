@@ -8,19 +8,21 @@ const createGoal = async (req, res) => {
 
         // Validate required fields
         if (!userId || !title || !Date) {
+            console.error("Validation Error: Missing required fields");
             return res.status(400).json({ message: "UserId, title, and date are required" });
         }
 
         // Check if user exists
         const user = await User.findByPk(userId);
         if (!user) {
+            console.error(`User not found: UserId ${userId}`);
             return res.status(404).json({ message: "User not found" });
         }
 
         const newGoal = await SetGoals.create({ userId, title, Date, isCompleted });
         res.status(201).json(newGoal);
     } catch (error) {
-        console.error("Error creating goal:", error);
+        console.error("Error creating goal:", error.message, error.stack);
         res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -31,7 +33,7 @@ const getAllGoals = async (req, res) => {
         const goals = await SetGoals.findAll({ include: User });
         res.status(200).json(goals);
     } catch (error) {
-        console.error("Error fetching goals:", error);
+        console.error("Error fetching goals:", error.message, error.stack);
         res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -40,15 +42,21 @@ const getAllGoals = async (req, res) => {
 const getGoalById = async (req, res) => {
     try {
         const { id } = req.params;
+        if (!id) {
+            console.error("Invalid request: Goal ID missing");
+            return res.status(400).json({ message: "Goal ID is required" });
+        }
+
         const goal = await SetGoals.findByPk(id, { include: User });
 
         if (!goal) {
+            console.error(`Goal not found: GoalId ${id}`);
             return res.status(404).json({ message: "Goal not found" });
         }
 
         res.status(200).json(goal);
     } catch (error) {
-        console.error("Error fetching goal:", error);
+        console.error("Error fetching goal:", error.message, error.stack);
         res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -59,8 +67,14 @@ const updateGoal = async (req, res) => {
         const { id } = req.params;
         const { title, Date, isCompleted } = req.body;
 
+        if (!id) {
+            console.error("Invalid request: Goal ID missing");
+            return res.status(400).json({ message: "Goal ID is required" });
+        }
+
         const goal = await SetGoals.findByPk(id);
         if (!goal) {
+            console.error(`Goal not found: GoalId ${id}`);
             return res.status(404).json({ message: "Goal not found" });
         }
 
@@ -71,7 +85,7 @@ const updateGoal = async (req, res) => {
         await goal.save();
         res.status(200).json(goal);
     } catch (error) {
-        console.error("Error updating goal:", error);
+        console.error("Error updating goal:", error.message, error.stack);
         res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -81,15 +95,21 @@ const deleteGoal = async (req, res) => {
     try {
         const { id } = req.params;
 
+        if (!id) {
+            console.error("Invalid request: Goal ID missing");
+            return res.status(400).json({ message: "Goal ID is required" });
+        }
+
         const goal = await SetGoals.findByPk(id);
         if (!goal) {
+            console.error(`Goal not found: GoalId ${id}`);
             return res.status(404).json({ message: "Goal not found" });
         }
 
         await goal.destroy();
         res.status(200).json({ message: "Goal deleted successfully" });
     } catch (error) {
-        console.error("Error deleting goal:", error);
+        console.error("Error deleting goal:", error.message, error.stack);
         res.status(500).json({ message: "Internal server error" });
     }
 };
