@@ -24,16 +24,15 @@ const registerUser = async (req, res) => {
             isAdmin: isAdmin || false // Default to false if not specified
         });
 
-        //    Ensure isAdmin is included in JWT token
-        const token = jwt.sign({ 
-            id: newUser.id, 
-            username: newUser.username, 
-            isAdmin: newUser.isAdmin 
-        }, process.env.JWT_SECRET, { expiresIn: "720h" });
+        // //    Ensure isAdmin is included in JWT token
+        // const token = jwt.sign({ 
+        //     id: newUser.id, 
+        //     username: newUser.username, 
+        //     isAdmin: newUser.isAdmin 
+        // }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
         res.status(201).json({ 
             message: "Registration Successful", 
-            token,
             isAdmin: newUser.isAdmin,
             username: newUser.username 
         });
@@ -62,11 +61,17 @@ const loginUser = async (req, res) => {
         }
 
         //    Ensure isAdmin is included in JWT token
-        const token = jwt.sign({
-            id: user.id,
-            username: user.username,
-            isAdmin: user.isAdmin 
-        }, process.env.JWT_SECRET, { expiresIn: "24h" });
+        // const token = jwt.sign({
+        //     id: user.id,
+        //     username: user.username,
+        //     isAdmin: user.isAdmin 
+        // }, process.env.JWT_SECRET, { expiresIn: "24h" });
+        const token = jwt.sign(
+            {id: user.username, username: user.username},
+            process.env.JWT_SECRET || 'FVHJAFJHSFVBSFBSSFJSF',
+            {expiresIn: '24h'}
+
+        )
 
         res.status(200).json({
             message: "Login Successful",

@@ -20,7 +20,7 @@ const SetGoals = sequelize.define('SetGoals',{
     },
 
     title:{
-         type:DataTypes.INTEGER,
+         type:DataTypes.STRING,
          allowNull:false
     },
      
@@ -35,5 +35,6 @@ const SetGoals = sequelize.define('SetGoals',{
     
     
 });
+SetGoals.belongsTo(User, { foreignKey: "userId" });
 
 module.exports = SetGoals;

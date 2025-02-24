@@ -1,17 +1,19 @@
 const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 const userRoutes = require('./routes/userRoute');
 const exercisesRoutes = require('./routes/exercisesRoute');
-const journalEntryRoutes = require('./routes/journalEntryController');
+const journalEntryRoutes = require('./routes/journalEntryRoute');
 const noteRoutes = require('./routes/noteRoute');
 const setGoalsRoutes = require('./routes/setGoalsRoute');
 
-//Creating a Server
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-//Creating a port
-const PORT = process.env.PORT || 5000
-
-
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Register routes
 app.use('/users', userRoutes);
@@ -20,13 +22,6 @@ app.use('/journalEntries', journalEntryRoutes);
 app.use('/notes', noteRoutes);
 app.use('/setGoals', setGoalsRoutes);
 
-// 404 Not Found Handler
-app.use((req, res) => {
-    res.status(404).json({ error: "Route not found" });
+app.listen(PORT, () => {
+    console.log(`Server Running on PORT ${PORT}`);
 });
-
-
-//Running on PORT
-app.listen(PORT, ()=>{
-    console.log(`Server Running on........................ PORT ${PORT}`)
-})

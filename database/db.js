@@ -1,8 +1,7 @@
 const{Sequelize}=require("sequelize");
 
-Sequelize
 
-const sequelize=new Sequelize('test','postgres','admin123',{
+const sequelize=new Sequelize('Novana','postgres','admin123',{
     host:'localhost',
     dialect:'postgres',
     port:5432,

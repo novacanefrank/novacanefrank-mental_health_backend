@@ -1,8 +1,8 @@
 const {DataTypes} = require('sequelize');
-const User = require("./UserModel")
+const User = require('../model/UserModel');
 const sequelize = require('../database/db');
 
-const JounalEntry = sequelize.define('JournalEntries',{
+const JournalEntry = sequelize.define('JournalEntries',{
 
     id:{
        type: DataTypes.INTEGER,
@@ -38,5 +38,5 @@ const JounalEntry = sequelize.define('JournalEntries',{
     
 });
 
-JounalEntry.belongsTo(User, { foreignKey: "userId" });
-module.exports = JounalEntry;
+JournalEntry.belongsTo(User, { foreignKey: "userId" });
+module.exports = JournalEntry;
