@@ -95,23 +95,23 @@ const getUser = async(req, res)=>{
     }
 }
 
-const createUser = async(req, res)=>{
+// const createUser = async(req, res)=>{
     
-    try{
+//     try{
         
-const {username, password} = req.body;
+// const {username,email, password} = req.body;
 
 //Hash the password
-const newtest = await User.create({username, password})
+// const newtest = await User.create({username,email, password})
 
-res.status(200).json(newtest);
-    }
-    catch(error){
-        res.status(500).json({error: "Failed to Load"})
-        console.log(error)
-    }
+// res.status(200).json(newtest);
+//     }
+//     catch(error){
+//         res.status(500).json({error: "Failed to Load"})
+//         console.log(error)
+//     }
 
-}
+// }
 
 const updateUser = async(req, res)=>{
     try {
@@ -139,7 +139,7 @@ const deleteUser = async(req, res)=>{
     }
 }
 
-module.exports = {createUser, getUser, deleteUser, updateUser,loginUser, registerUser}
+module.exports = { getUser, deleteUser, updateUser,loginUser, registerUser}
 
 
 
