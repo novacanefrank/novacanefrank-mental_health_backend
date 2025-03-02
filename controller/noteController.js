@@ -28,25 +28,25 @@ const createNote = async (req, res) => {
 };
 
 // Get all notes
+// Example backend logic (make sure to validate userId)
+// Get all notes
 const getAllNotes = async (req, res) => {
     try {
-        const { userId } = req.query; // Get userId from request query parameters
+        const { userId } = req.query; // Make sure userId is passed as a query parameter
         if (!userId) {
-            console.error("User ID is required to fetch notes");
-            return res.status(400).json({ message: "User ID is required" });
+            return res.status(400).json({ error: "User ID is required" });
         }
 
-        const notes = await Note.findAll({ 
-            where: { userId },  // Fetch only notes belonging to the logged-in user
-            include: User 
+        const notes = await Note.findAll({  // Change Notes to Note
+            where: { userId: userId }, // Use userId in the query
         });
-
-        res.status(200).json(notes);
+        res.json(notes);
     } catch (error) {
-        console.error("Error fetching notes:", error.message, error.stack);
-        res.status(500).json({ message: "Internal server error" });
+        console.error("Error fetching notes:", error.message);
+        res.status(500).json({ error: "An error occurred while fetching notes." });
     }
 };
+
 
 // Get a specific note by ID
 const getNoteById = async (req, res) => {
